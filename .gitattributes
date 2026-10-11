@@ -1,0 +1,3 @@
+# Sample InBody exports are test fixtures: keep their exact bytes (BOM + CRLF),
+# so the CSV tests see the same file on every OS.
+samples/*.csv -text

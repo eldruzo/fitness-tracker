@@ -66,7 +66,7 @@ export const KEY_METRICS = [
 ] as const satisfies readonly InbodyColumn[];
 
 export function normalizeHeader(h: string): string {
-  return h.replace(/^﻿/, '').trim().replace(/\s+/g, ' ').toLowerCase();
+  return h.replace(/^\uFEFF/, '').trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
 const CANONICAL = new Map(INBODY_COLUMNS.map((c) => [normalizeHeader(c), c] as const));

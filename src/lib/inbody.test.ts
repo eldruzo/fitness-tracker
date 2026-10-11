@@ -21,7 +21,7 @@ describe('CSV parser', () => {
     ]);
   });
   it('tolerates BOM, CR-only line endings and trailing blank lines', () => {
-    expect(parseCsv('﻿x,y\r1,2\r\r\n\n')).toEqual([
+    expect(parseCsv('\uFEFFx,y\r1,2\r\r\n\n')).toEqual([
       ['x', 'y'],
       ['1', '2'],
     ]);
@@ -124,8 +124,8 @@ describe('InBody export', () => {
     const lines = out.split('\r\n');
     expect(lines[0]).toBe(INBODY_COLUMNS.join(','));
     expect(lines[3]).toBe(['20261018090010', 'InBody570', ...Array(43).fill('-')].join(','));
-    // identical to the source data rows
-    const src = sample.replace(/^﻿/, '').split('\r\n').filter(Boolean);
+    // Identical to the source data rows, whatever line endings the fixture has.
+    const src = sample.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
     expect(lines.filter(Boolean)).toEqual(src);
   });
 });
