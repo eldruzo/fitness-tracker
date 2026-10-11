@@ -1,0 +1,103 @@
+/* Design tokens — see DESIGN.md. Light = paper sheet, dark = graphite. One accent: signal orange. */
+:root {
+  color-scheme: light;
+  --bg: #f4f1ea;
+  --surface: #fbf9f4;
+  --surface-2: #ece8de;
+  --ink: #161513;
+  --ink-2: #4a4740;
+  --ink-3: #66625a;
+  --rule: #d6d1c4;
+  --rule-strong: #161513;
+  --accent: #b23e0b;
+  --accent-ink: #9c3509;
+  --on-accent: #ffffff;
+  --accent-soft: #f6dfd1;
+  --ok: #2f6b3a;
+  --warn: #7a5a00;
+  --missed: #4f5675;
+  --muted-status: #66625a;
+  --danger: #8f2a1d;
+  --focus: #1f55c7;
+  --chart-line: var(--ink);
+  --shadow: 0 1px 0 var(--rule);
+
+  --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Fluid type scale, 360px → 1440px */
+  --step--1: clamp(0.78rem, 0.76rem + 0.07vw, 0.83rem);
+  --step-0: clamp(0.94rem, 0.92rem + 0.11vw, 1rem);
+  --step-1: clamp(1.13rem, 1.08rem + 0.22vw, 1.25rem);
+  --step-2: clamp(1.35rem, 1.26rem + 0.42vw, 1.6rem);
+  --step-3: clamp(1.62rem, 1.46rem + 0.72vw, 2.1rem);
+  --step-4: clamp(2.2rem, 1.87rem + 1.48vw, 3.2rem);
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+
+  --radius: 2px;
+  --nav-h: 60px;
+  --rail-w: 88px;
+  --tap: 44px;
+  --content-w: 44rem;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #121211;
+    --surface: #1b1b19;
+    --surface-2: #252522;
+    --ink: #ece9e1;
+    --ink-2: #b5b1a7;
+    --ink-3: #959186;
+    --rule: #34332f;
+    --rule-strong: #ece9e1;
+    --accent: #ff8f52;
+    --accent-ink: #ffa877;
+    --on-accent: #1a0d05;
+    --accent-soft: #3a2316;
+    --ok: #7fc48c;
+    --warn: #e2c060;
+    --missed: #a9aecb;
+    --muted-status: #959186;
+    --danger: #ff9b8a;
+    --focus: #8fb3ff;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1b1b19;
+  --surface-2: #252522;
+  --ink: #ece9e1;
+  --ink-2: #b5b1a7;
+  --ink-3: #959186;
+  --rule: #34332f;
+  --rule-strong: #ece9e1;
+  --accent: #ff8f52;
+  --accent-ink: #ffa877;
+  --on-accent: #1a0d05;
+  --accent-soft: #3a2316;
+  --ok: #7fc48c;
+  --warn: #e2c060;
+  --missed: #a9aecb;
+  --muted-status: #959186;
+  --danger: #ff9b8a;
+  --focus: #8fb3ff;
+}
