@@ -5,6 +5,8 @@ An offline training log for one person and one plan: a 6-day split from
 It opens on **today's session** and walks you through warm-up, cardio and three
 moves of 4 × 12, with rest timers. It also logs weekly InBody measurements from CSV.
 
+**Live:** [eldruzo.github.io/fitness-tracker](https://eldruzo.github.io/fitness-tracker/)
+
 There is no backend, no account and no analytics. Everything lives in your
 browser's IndexedDB, and the app works with no network after the first load.
 
@@ -56,6 +58,11 @@ npm run preview      # serve dist/ on http://localhost:4173
 `dist/` is a plain static site with relative paths (`base: './'`) and hash
 routing, so it runs from any static host or subfolder: GitHub Pages, Netlify,
 Cloudflare Pages, S3, or `nginx` with no rewrite rules.
+
+**GitHub Pages (set up).** `.github/workflows/deploy.yml` runs the unit tests,
+builds, and deploys `dist/` on every push to `main` (or manually from the
+Actions tab). One-time setup: repo **Settings → Pages → Source: GitHub
+Actions**. The site is served at `https://eldruzo.github.io/fitness-tracker/`.
 
 - It must be served over **HTTPS** (or `localhost`) for the service worker,
   install prompt, wake lock and persistent storage to work.
