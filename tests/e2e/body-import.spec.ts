@@ -6,7 +6,7 @@ const sample = fileURLToPath(new URL('../../samples/inbody-sample.csv', import.m
 test('imports the InBody CSV once, and flags duplicates on re-import', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-10-26T09:00:00'));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Use the sample plan' }).click();
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
   await page.goto('/#/body');
 
   await page.getByRole('button', { name: 'Import InBody CSV' }).click();

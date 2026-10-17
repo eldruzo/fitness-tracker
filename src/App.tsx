@@ -35,7 +35,6 @@ function lazy(loader: () => Promise<{ default: ComponentType }>) {
 const Progress = lazy(() => import('./screens/Progress'));
 const Body = lazy(() => import('./screens/Body'));
 const Settings = lazy(() => import('./screens/Settings'));
-const Setup = lazy(() => import('./screens/Setup'));
 
 const TABS: { name: Route['name']; icon: IconName; label: MessageKey; href: string }[] = [
   { name: 'today', icon: 'today', label: 'nav.today', href: '#/' },
@@ -54,12 +53,6 @@ function useTheme() {
     const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute('content', dark ? '#121211' : '#F4F1EA');
   }, [theme]);
-  const accent = settings.value.accent;
-  useEffect(() => {
-    const root = document.documentElement;
-    if (accent === 'orange') root.removeAttribute('data-accent');
-    else root.setAttribute('data-accent', accent);
-  }, [accent]);
 }
 
 export function App() {
@@ -118,8 +111,6 @@ function Screen({ r }: { r: Route }) {
       return <Body />;
     case 'settings':
       return <Settings />;
-    case 'setup':
-      return <Setup />;
   }
 }
 

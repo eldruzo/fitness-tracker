@@ -1,11 +1,11 @@
 import { useRef, useState } from 'preact/hooks';
-import { t } from '../i18n';
+import { fmtDate, t } from '../i18n';
 import { BackupError } from '../lib/backup';
-import { go } from '../router';
-import { parseBackup, requestPersistence, restoreBackup } from '../state';
+import { parseBackup, program, requestPersistence, restoreBackup } from '../state';
 import { Button } from '../ui/components';
 
 export function FirstRun({ onDone }: { onDone: () => void }) {
+  const p = program.value;
   const file = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +26,7 @@ export function FirstRun({ onDone }: { onDone: () => void }) {
         <h1 class="sheet-title" tabIndex={-1}>
           {t('first.title')}
         </h1>
+        <p class="sheet-meta">{t('today.programDates', { start: fmtDate(p.startDate), end: fmtDate(p.endDate) })}</p>
       </header>
       <ol class="first-points">
         <li>
@@ -47,17 +48,15 @@ export function FirstRun({ onDone }: { onDone: () => void }) {
         </p>
       )}
       <div class="first-actions">
-        <Button variant="primary" class="btn-xl" onClick={() => go({ name: 'setup' })}>
-          {t('first.start')}
-        </Button>
         <Button
-          variant="secondary"
+          variant="primary"
+          class="btn-xl"
           onClick={() => {
             void requestPersistence();
             onDone();
           }}
         >
-          {t('first.sample')}
+          {t('first.start')}
         </Button>
         <Button variant="text" icon="upload" onClick={() => file.current?.click()}>
           {t('first.import')}

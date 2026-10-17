@@ -39,13 +39,13 @@ function phaseMoves(rows: {
 
 export function seedProgram(): Program {
   const weekdays: WeekdayPlan[] = [
-    { focus: 'Pull + hinge', intensity: 'hard', rest: false, groups: ['pull', 'hinge'] },
-    { focus: 'Shoulders + arms', intensity: 'light', rest: false, groups: ['arms'] },
-    { focus: 'Push', intensity: '', rest: false, groups: ['push'] },
-    { focus: 'Biceps / rear delts / core', intensity: 'lightest', rest: false, groups: ['core'] },
-    { focus: 'Pull + hinge', intensity: 'hard', rest: false, groups: ['pull', 'hinge'] },
-    { focus: 'Rest', intensity: '', rest: true, groups: [] },
-    { focus: 'Push', intensity: 'hard', rest: false, groups: ['push'] },
+    { focus: 'Pull + hinge', intensity: 'hard', work: 'Off', rest: false, groups: ['pull', 'hinge'] },
+    { focus: 'Shoulders + arms', intensity: 'light', work: 'WFO', rest: false, groups: ['arms'] },
+    { focus: 'Push', intensity: '', work: 'WFO', rest: false, groups: ['push'] },
+    { focus: 'Biceps / rear delts / core', intensity: 'lightest', work: 'WFO', rest: false, groups: ['core'] },
+    { focus: 'Pull + hinge', intensity: 'hard', work: 'WFH', rest: false, groups: ['pull', 'hinge'] },
+    { focus: 'Rest', intensity: '', work: 'WFH', rest: true, groups: [] },
+    { focus: 'Push', intensity: 'hard', work: 'Off', rest: false, groups: ['push'] },
   ];
 
   return {
@@ -92,7 +92,7 @@ export function seedProgram(): Program {
         sun: ['Lat pulldown', 'Single-arm dumbbell row', 'Lying leg curl'],
       }),
     },
-    session: { warmupMin: 5, cardioMin: 10, cooldownMin: 10, sets: 4, reps: 12, restSetSec: 180, restMoveSec: 300 },
+    session: { warmupMin: 5, cardioMin: 10, sets: 4, reps: 12, restSetSec: 180, restMoveSec: 300 },
   };
 }
 
@@ -101,7 +101,6 @@ export function defaultSettings(): Settings {
     deload: true,
     deloadPct: 70,
     theme: 'system',
-    accent: 'orange',
     unit: 'kg',
     hints: true,
     progression: false,
@@ -111,7 +110,6 @@ export function defaultSettings(): Settings {
     counterTarget: 50,
     sound: true,
     vibrate: true,
-    autoStart: true,
     pauses: [],
   };
 }

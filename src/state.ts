@@ -21,7 +21,6 @@ import type {
   TimerKind,
   TimerState,
 } from './lib/types';
-import type { TimedStepKind } from './lib/session';
 import {
   sanitizeBody,
   sanitizeCounters,
@@ -44,8 +43,6 @@ export interface Meta {
   backupSnoozeUntil: number | null;
   persistBannerDismissed: boolean;
   installDismissed: boolean;
-  /** Last setup-wizard answers, so "Re-run setup" starts from them. Shape owned by lib/generator. */
-  setupAnswers?: unknown;
 }
 
 const defaultMeta = (): Meta => ({
@@ -324,7 +321,7 @@ export function startSession(date: DateKey) {
   const l = ensureLog(date);
   if (l.status !== 'active') setLog({ ...l, status: 'active', startedAt: l.startedAt ?? Date.now() });
   if (!active.value || active.value.date !== date) setActive({ date, timer: null, drafts: {} });
-  if (!l.warmup && settings.value.autoStart) startTimer('warmup', 0);
+  if (!l.warmup) startTimer('warmup', 0);
 }
 
 function mutateLog(date: DateKey, fn: (l: DayLog) => DayLog) {
@@ -332,16 +329,11 @@ function mutateLog(date: DateKey, fn: (l: DayLog) => DayLog) {
   setLog(fn(structuredClone(l)));
 }
 
-export function setStepDone(date: DateKey, step: TimedStepKind, done: boolean) {
+export function setStepDone(date: DateKey, step: 'warmup' | 'cardio', done: boolean) {
   mutateLog(date, (l) => ({ ...l, [step]: done }));
   const a = active.value;
   if (a?.timer && a.timer.kind === step) setTimer(null);
-  if (done && step === 'warmup' && !logs.value.get(date)?.cardio && isToday(date) && settings.value.autoStart) startTimer('cardio', 1);
-}
-
-/** Step index of the cool-down, or -1 when the program has none. */
-function cooldownStep(l: DayLog): number {
-  return program.value.session.cooldownMin > 0 ? l.moves.length + 2 : -1;
+  if (done && step === 'warmup' && !logs.value.get(date)?.cardio && isToday(date)) startTimer('cardio', 1);
 }
 
 const isToday = (d: DateKey) => d === today.value;
@@ -362,19 +354,9 @@ export function logSet(date: DateKey, moveIdx: number, kg: number | null, reps: 
   });
   if (!isToday(date)) return; // backfill: no timers
   if (!active.value || active.value.date !== date) setActive({ date, timer: null, drafts: active.value?.drafts ?? {} });
-  if (!settings.value.autoStart) return setTimer(null);
-  const l = logs.value.get(date)!;
-  const cool = cooldownStep(l);
   if (!finishedMove) startTimer('rest-set', moveIdx + 2);
   else if (!lastMove) startTimer('rest-move', moveIdx + 3);
-  else if (cool !== -1 && !l.cooldown) startTimer('cooldown', cool);
   else setTimer(null);
-}
-
-/** Manual rest timer, for when auto-start is off. */
-export function startRest(moveIdx: number, moveFinished: boolean) {
-  if (moveFinished) startTimer('rest-move', moveIdx + 3);
-  else startTimer('rest-set', moveIdx + 2);
 }
 
 export function undoSet(date: DateKey, moveIdx: number) {
@@ -470,8 +452,6 @@ export function timerDuration(kind: TimerKind): number {
       return s.warmupMin * 60_000;
     case 'cardio':
       return s.cardioMin * 60_000;
-    case 'cooldown':
-      return s.cooldownMin * 60_000;
     case 'rest-set':
       return s.restSetSec * 1000;
     case 'rest-move':
@@ -515,17 +495,15 @@ export function skipTimer() {
   const t = a?.timer;
   if (!a || !t) return;
   setTimer(null);
-  if (isTimedStep(t.kind)) setStepDone(a.date, t.kind, true);
+  if (t.kind === 'warmup' || t.kind === 'cardio') setStepDone(a.date, t.kind, true);
 }
-
-const isTimedStep = (k: TimerKind): k is TimedStepKind => k === 'warmup' || k === 'cardio' || k === 'cooldown';
 
 /** Called by the ticker when a timer reaches zero; returns true the first time. */
 export function markTimerEnded(): boolean {
   const a = active.value;
   const t = a?.timer;
   if (!a || !t || t.notified) return false;
-  if (isTimedStep(t.kind)) {
+  if (t.kind === 'warmup' || t.kind === 'cardio') {
     setTimer({ ...t, notified: true });
     setStepDone(a.date, t.kind, true);
   } else {
@@ -704,31 +682,6 @@ export function updateProgram(p: Program) {
   program.value = p;
   void putMeta('program', p);
 }
-
-/**
- * Switches to a plan made by the setup wizard. Never deletes logs: history
- * follows move names. Plan changes for today and later belong to the old plan,
- * so they are dropped; today's session restarts from the new plan if nothing
- * was logged yet.
- */
-export async function applySetup(p: Program, answers: unknown, patch: Partial<Settings>) {
-  const t = today.value;
-  const future = [...overrides.value.keys()].filter((d) => d >= t);
-  if (future.length) {
-    const next = new Map(overrides.value);
-    for (const d of future) next.delete(d);
-    overrides.value = next;
-    await store.putMany({ overrides: [], deleteOverrides: future }).catch(() => (saveError.value = true));
-  }
-  updateProgram(p);
-  updateSettings(patch);
-  const l = logs.value.get(t);
-  if (l && !hasSets(l)) setLog({ ...l, moves: snapshotMoves(planFor(t, ctx.value).moves) });
-  if (active.value?.timer && !(l && hasSets(l))) setTimer(null);
-  updateMeta({ firstRunDone: true, setupAnswers: answers });
-}
-
-const hasSets = (l: DayLog) => l.moves.some((m) => m.sets.length > 0);
 
 // ─── Backup ─────────────────────────────────────────────────────────────────
 
