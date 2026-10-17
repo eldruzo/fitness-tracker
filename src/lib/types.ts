@@ -9,14 +9,12 @@ export interface Phase {
   end: DateKey;
 }
 
-export type WorkTag = 'WFO' | 'WFH' | 'Off';
 export type MuscleGroup = 'push' | 'pull' | 'hinge' | 'arms' | 'core';
 
 export interface WeekdayPlan {
   focus: string;
   /** e.g. "light", "hard" */
   intensity: string;
-  work: WorkTag;
   rest: boolean;
   groups: MuscleGroup[];
 }

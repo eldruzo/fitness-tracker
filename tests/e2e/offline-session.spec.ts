@@ -5,7 +5,7 @@ const TUESDAY = new Date('2026-10-13T09:00:00');
 async function firstRun(page: Page) {
   await page.clock.setFixedTime(TUESDAY);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Start', exact: true }).click();
+  await page.getByRole('button', { name: 'Use the sample plan' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Push' })).toBeVisible();
 }
 

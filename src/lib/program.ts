@@ -39,13 +39,13 @@ function phaseMoves(rows: {
 
 export function seedProgram(): Program {
   const weekdays: WeekdayPlan[] = [
-    { focus: 'Pull + hinge', intensity: 'hard', work: 'Off', rest: false, groups: ['pull', 'hinge'] },
-    { focus: 'Shoulders + arms', intensity: 'light', work: 'WFO', rest: false, groups: ['arms'] },
-    { focus: 'Push', intensity: '', work: 'WFO', rest: false, groups: ['push'] },
-    { focus: 'Biceps / rear delts / core', intensity: 'lightest', work: 'WFO', rest: false, groups: ['core'] },
-    { focus: 'Pull + hinge', intensity: 'hard', work: 'WFH', rest: false, groups: ['pull', 'hinge'] },
-    { focus: 'Rest', intensity: '', work: 'WFH', rest: true, groups: [] },
-    { focus: 'Push', intensity: 'hard', work: 'Off', rest: false, groups: ['push'] },
+    { focus: 'Pull + hinge', intensity: 'hard', rest: false, groups: ['pull', 'hinge'] },
+    { focus: 'Shoulders + arms', intensity: 'light', rest: false, groups: ['arms'] },
+    { focus: 'Push', intensity: '', rest: false, groups: ['push'] },
+    { focus: 'Biceps / rear delts / core', intensity: 'lightest', rest: false, groups: ['core'] },
+    { focus: 'Pull + hinge', intensity: 'hard', rest: false, groups: ['pull', 'hinge'] },
+    { focus: 'Rest', intensity: '', rest: true, groups: [] },
+    { focus: 'Push', intensity: 'hard', rest: false, groups: ['push'] },
   ];
 
   return {

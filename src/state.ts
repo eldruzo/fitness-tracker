@@ -44,6 +44,8 @@ export interface Meta {
   backupSnoozeUntil: number | null;
   persistBannerDismissed: boolean;
   installDismissed: boolean;
+  /** Last setup-wizard answers, so "Re-run setup" starts from them. Shape owned by lib/generator. */
+  setupAnswers?: unknown;
 }
 
 const defaultMeta = (): Meta => ({
@@ -702,6 +704,31 @@ export function updateProgram(p: Program) {
   program.value = p;
   void putMeta('program', p);
 }
+
+/**
+ * Switches to a plan made by the setup wizard. Never deletes logs: history
+ * follows move names. Plan changes for today and later belong to the old plan,
+ * so they are dropped; today's session restarts from the new plan if nothing
+ * was logged yet.
+ */
+export async function applySetup(p: Program, answers: unknown, patch: Partial<Settings>) {
+  const t = today.value;
+  const future = [...overrides.value.keys()].filter((d) => d >= t);
+  if (future.length) {
+    const next = new Map(overrides.value);
+    for (const d of future) next.delete(d);
+    overrides.value = next;
+    await store.putMany({ overrides: [], deleteOverrides: future }).catch(() => (saveError.value = true));
+  }
+  updateProgram(p);
+  updateSettings(patch);
+  const l = logs.value.get(t);
+  if (l && !hasSets(l)) setLog({ ...l, moves: snapshotMoves(planFor(t, ctx.value).moves) });
+  if (active.value?.timer && !(l && hasSets(l))) setTimer(null);
+  updateMeta({ firstRunDone: true, setupAnswers: answers });
+}
+
+const hasSets = (l: DayLog) => l.moves.some((m) => m.sets.length > 0);
 
 // ─── Backup ─────────────────────────────────────────────────────────────────
 

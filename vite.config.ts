@@ -17,7 +17,7 @@ export default defineConfig({
         id: './',
         name: 'Gym Log',
         short_name: 'Gym Log',
-        description: 'Offline training log for a 16-week, 6-day plan.',
+        description: 'Offline training log with a plan built for you.',
         lang: 'en',
         start_url: './',
         scope: './',

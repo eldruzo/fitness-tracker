@@ -35,6 +35,7 @@ function lazy(loader: () => Promise<{ default: ComponentType }>) {
 const Progress = lazy(() => import('./screens/Progress'));
 const Body = lazy(() => import('./screens/Body'));
 const Settings = lazy(() => import('./screens/Settings'));
+const Setup = lazy(() => import('./screens/Setup'));
 
 const TABS: { name: Route['name']; icon: IconName; label: MessageKey; href: string }[] = [
   { name: 'today', icon: 'today', label: 'nav.today', href: '#/' },
@@ -117,6 +118,8 @@ function Screen({ r }: { r: Route }) {
       return <Body />;
     case 'settings':
       return <Settings />;
+    case 'setup':
+      return <Setup />;
   }
 }
 

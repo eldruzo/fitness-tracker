@@ -111,7 +111,7 @@ export interface ShiftPreview {
 
 /**
  * "Shift plan": the missed session moves to the next open training slot from
- * today on, and every later session slides back one slot. Fridays (planned rest)
+ * today on, and every later session slides back one slot. Rest days
  * and paused days are never used as slots. Phases and deload stay tied to the
  * calendar; only which weekday's session is trained changes.
  */
@@ -155,7 +155,7 @@ export interface Stats {
 }
 
 /**
- * Completion % and streak count only planned training days (not Friday rest,
+ * Completion % and streak count only planned training days (not rest days,
  * not paused days). Today counts once it is done; an unfinished today neither
  * counts nor breaks the streak.
  */

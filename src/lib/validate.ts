@@ -91,7 +91,6 @@ export function sanitizeProgram(raw: unknown): Program {
       return {
         focus: typeof w.focus === 'string' ? w.focus : seed.weekdays[i].focus,
         intensity: typeof w.intensity === 'string' ? w.intensity : '',
-        work: w.work === 'WFO' || w.work === 'WFH' || w.work === 'Off' ? w.work : seed.weekdays[i].work,
         rest: w.rest === true,
         groups: Array.isArray(w.groups)
           ? (w.groups.filter((g) => ['push', 'pull', 'hinge', 'arms', 'core'].includes(g as string)) as Program['weekdays'][number]['groups'])

@@ -118,7 +118,6 @@ export function SheetHeader({ plan, compact }: { plan: PlannedDay; compact?: boo
         )}
       </p>
       <p class="sheet-tags">
-        <Stamp title={t(`work.${p.work}Long`)}>{t(`work.${p.work}`)}</Stamp>
         {p.intensity && !plan.rest && <Stamp>{p.intensity}</Stamp>}
         {plan.deload && <Stamp accent>{t('today.deload')}</Stamp>}
         {plan.swapped && <Stamp>{t('status.swapped')}</Stamp>}

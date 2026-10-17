@@ -2091,3 +2091,182 @@ details[open] > summary::before {
 .dialog-body {
   position: relative;
 }
+
+/* ─── Setup wizard ────────────────────────────────────────────────────── */
+.setup-progress {
+  height: 4px;
+  margin-top: var(--s3);
+  background: var(--rule);
+}
+.setup-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease);
+}
+.setup-step {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s2);
+}
+.setup-step > .segmented {
+  align-self: start;
+}
+.setup-offline {
+  margin-top: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule);
+}
+.setup-split {
+  font-weight: 600;
+  font-size: var(--step--1);
+}
+.choices {
+  display: grid;
+  gap: var(--s2);
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 56px;
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.choice.on {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+.choice-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 50%;
+}
+.choice.on .choice-mark {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.choice-label {
+  font-weight: 700;
+}
+.day-chips {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s1);
+}
+.day-chip {
+  min-height: var(--tap);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: var(--step--1);
+  font-stretch: 85%;
+  text-transform: uppercase;
+}
+.day-chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.day-chip:disabled {
+  opacity: 0.4;
+}
+.setup-stepper {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s1) 0;
+}
+.stepper-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 2.5rem;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: var(--step-1);
+}
+.setup-shuffle {
+  align-self: start;
+}
+.setup-week {
+  border-top: 1px solid var(--rule-strong);
+}
+.setup-week > li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: var(--s3);
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.setup-wd {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent-ink);
+  text-transform: uppercase;
+}
+.setup-week > li.is-rest .setup-wd,
+.setup-week > li.is-rest .setup-focus {
+  color: var(--ink-3);
+}
+.setup-focus {
+  font-weight: 700;
+  font-stretch: 85%;
+}
+.setup-moves {
+  margin-top: var(--s1);
+  color: var(--ink-2);
+  font-size: var(--step--1);
+  list-style: decimal inside;
+}
+/* Same pinning as the session dock: above the tab bar on phones, bottom edge on desktop. */
+.setup-nav {
+  position: sticky;
+  bottom: calc(var(--nav-h) + var(--safe-b));
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: var(--s5) calc(-1 * var(--s4)) 0;
+  padding: var(--s3) var(--s4);
+  background: var(--bg);
+  border-top: 2px solid var(--rule-strong);
+}
+@media (min-width: 900px) {
+  .setup-nav {
+    bottom: var(--safe-b);
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+.setup-nav .btn-primary {
+  flex: 1;
+  max-width: 20rem;
+}
+.rerun {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--s2);
+  padding-bottom: var(--s4);
+  margin-bottom: var(--s3);
+  border-bottom: 1px solid var(--rule);
+}

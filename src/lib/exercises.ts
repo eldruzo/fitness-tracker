@@ -87,6 +87,24 @@ const CURATED: Record<string, string> = {
   lunge: 'Dumbbell_Lunges',
   'barbell curl': 'Barbell_Curl',
   'hanging leg raise': 'Hanging_Leg_Raise',
+  // Setup-wizard library (lib/library.ts).
+  'incline push-up': 'Incline_Push-Up',
+  'barbell shoulder press': 'Barbell_Shoulder_Press',
+  'pec deck': 'Butterfly',
+  'cable crossover': 'Cable_Crossover',
+  'dumbbell fly': 'Dumbbell_Flyes',
+  'bench dips': 'Bench_Dips',
+  'barbell row': 'Bent_Over_Barbell_Row',
+  'inverted row': 'Inverted_Row',
+  'reverse fly': 'Reverse_Flyes',
+  superman: 'Superman',
+  'bodyweight squat': 'Bodyweight_Squat',
+  'glute bridge': 'Butt_Lift_Bridge',
+  'step-up': 'Dumbbell_Step_Ups',
+  'split squat': 'Split_Squats',
+  'dumbbell calf raise': 'Dumbbell_Seated_One-Leg_Calf_Raise',
+  'calf raise on a step': 'Calf_Raise_On_A_Dumbbell',
+  'mountain climber': 'Mountain_Climbers',
 };
 
 /** Lowercase, punctuation to spaces, simple singular ("curls" → "curl"). */
