@@ -47,11 +47,6 @@ export function fmtKg(n: number | null | undefined): string {
   return n === null || n === undefined ? '–' : `${fmtNum(n, 2)} kg`;
 }
 
-/** One logged set: "5 kg × 12", or "12 reps" for bodyweight. */
-export function fmtSet(bodyweight: boolean, kg: number | null, reps: number): string {
-  return bodyweight || kg === null ? `${reps} reps` : `${fmtKg(kg)} × ${reps}`;
-}
-
 /** "+2.5", "−1", "0" — uses a real minus sign. */
 export function fmtSigned(n: number, digits = 1): string {
   if (n === 0) return fmtNum(0, digits);

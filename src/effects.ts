@@ -57,8 +57,6 @@ function timerEndMessage(timer: TimerState): string {
       return t('timer.endWarmup');
     case 'cardio':
       return t('timer.endCardio');
-    case 'cooldown':
-      return t('timer.endCooldown');
     case 'rest-set':
       return t('timer.endRestSet');
     case 'rest-move':

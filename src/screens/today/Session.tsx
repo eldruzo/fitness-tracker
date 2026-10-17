@@ -4,8 +4,7 @@ import { fmtDate, fmtDuration, fmtKg, fmtNum, t, type MessageKey } from '../../i
 import type { DateKey } from '../../lib/dates';
 import { deloadKg, moveKey, type PlannedDay } from '../../lib/program';
 import { isNewThisPhase, lastBefore, lastInEarlierPhase, lastKg, progressionSuggestion } from '../../lib/progress';
-import { COOLDOWN_ROUTINE, exerciseFor, exerciseImages, exerciseIndex, loadExerciseIndex, WARMUP_ROUTINE, type RoutineItem } from '../../lib/exercises';
-import { buildSteps, currentStep, type Step, type TimedStepKind } from '../../lib/session';
+import { buildSteps, currentStep, type Step } from '../../lib/session';
 import type { DayLog, MoveLog } from '../../lib/types';
 import { KG_MAX, validKg, validReps } from '../../lib/validate';
 import {
@@ -24,10 +23,8 @@ import {
   setStepDone,
   settings,
   skipTimer,
-  startRest,
   startSession,
   startTimer,
-  today,
   undoSet,
 } from '../../state';
 import { Button, Dialog, Stamp } from '../../ui/components';
@@ -76,7 +73,6 @@ export function Session({ plan, log }: { plan: PlannedDay; log: DayLog | undefin
 function stepTitle(s: Step): string {
   if (s.kind === 'warmup') return t('session.warmup');
   if (s.kind === 'cardio') return t('session.cardio');
-  if (s.kind === 'cooldown') return t('session.cooldown');
   return s.move!.name;
 }
 
@@ -102,9 +98,7 @@ function StepRow({
       ? t('session.minutes', { n: spec.warmupMin })
       : step.kind === 'cardio'
         ? t('session.minutes', { n: spec.cardioMin })
-        : step.kind === 'cooldown'
-          ? t('session.minutes', { n: spec.cooldownMin })
-          : t('session.setsReps', { sets: spec.sets, reps: spec.reps }) + (step.move!.bodyweight ? ` · ${t('session.bodyweight')}` : '');
+        : t('session.setsReps', { sets: spec.sets, reps: spec.reps }) + (step.move!.bodyweight ? ` · ${t('session.bodyweight')}` : '');
   const state = step.done ? 'done' : step.skipped ? 'skipped' : step.kind === 'move' && step.setsDone ? 'partial' : '';
   return (
     <li class={`step${isCurrent ? ' is-current' : ''}${isOpen ? ' is-open' : ''}${state ? ` is-${state}` : ''}`}>
@@ -142,84 +136,17 @@ function StepRow({
   );
 }
 
-const TIMED_HINT = { warmup: 'session.warmupHint', cardio: 'session.cardioHint', cooldown: 'session.cooldownHint' } as const;
-const TIMED_DONE = { warmup: 'session.warmupDone', cardio: 'session.cardioDone', cooldown: 'session.cooldownDone' } as const;
-
 function TimedStepDetail({ step, date }: { step: Step; date: DateKey }) {
-  const kind = step.kind as TimedStepKind;
-  const routine = kind === 'warmup' ? WARMUP_ROUTINE : kind === 'cooldown' ? COOLDOWN_ROUTINE : null;
+  const kind = step.kind as 'warmup' | 'cardio';
   return (
     <div class="timed-detail">
-      <p class="hint">{t(TIMED_HINT[kind])}</p>
-      {routine && <Routine items={routine} />}
+      <p class="hint">{t(kind === 'warmup' ? 'session.warmupHint' : 'session.cardioHint')}</p>
       {step.done && (
         <Button variant="text" icon="undo" onClick={() => setStepDone(date, kind, false)}>
           {t('session.markNotDone')}
         </Button>
       )}
     </div>
-  );
-}
-
-function Routine({ items }: { items: RoutineItem[] }) {
-  return (
-    <ol class="routine">
-      {items.map((r) => (
-        <li key={r.id}>
-          <details class="routine-item">
-            <summary>
-              <Thumb id={r.id} />
-              <span class="routine-name">{r.name}</span>
-              <span class="routine-dose mono">{r.dose}</span>
-            </summary>
-            <ExerciseFigure id={r.id} name={r.name} />
-          </details>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-/** Small first-frame picture; an empty box if it can't load (offline on first view). */
-function Thumb({ id }: { id: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span class="routine-thumb" aria-hidden="true" />;
-  return (
-    <img
-      class="routine-thumb"
-      src={exerciseImages(id)[0]}
-      alt=""
-      width={48}
-      height={48}
-      loading="lazy"
-      decoding="async"
-      crossOrigin="anonymous"
-      onError={() => setFailed(true)}
-    />
-  );
-}
-
-/** Start and end position photos. Renders nothing when they can't load. */
-export function ExerciseFigure({ id, name }: { id: string; name: string }) {
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [id]);
-  if (failed) return null;
-  return (
-    <figure class="ex-figure">
-      {exerciseImages(id).map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt={t(i === 0 ? 'move.photoStart' : 'move.photoEnd', { name })}
-          width={250}
-          height={250}
-          loading="lazy"
-          decoding="async"
-          crossOrigin="anonymous"
-          onError={() => setFailed(true)}
-        />
-      ))}
-    </figure>
   );
 }
 
@@ -241,17 +168,9 @@ function MoveDetail({ plan, step, date }: { plan: PlannedDay; step: Step; date: 
   const spec = program.value.session;
   const info = moveInfo(plan, move, step.moveIdx);
   const [rename, setRename] = useState(false);
-  void exerciseIndex.value; // re-render once the name index has loaded
-  const imageId = exerciseFor(move.name);
-  useEffect(() => {
-    if (!imageId) loadExerciseIndex();
-  }, [imageId]);
-  const timer = active.value?.date === date ? active.value.timer : null;
-  const manualRest = !settings.value.autoStart && date === today.value && move.sets.length > 0 && !timer;
 
   return (
     <div class="move-detail">
-      {imageId && <ExerciseFigure id={imageId} name={move.name} />}
       <div class="move-tags">
         {info.isNew && <Stamp>{t('move.new')}</Stamp>}
         {info.deload !== null && <Stamp>{t('move.deloadSuggest', { kg: fmtNum(info.deload, 1), pct: settings.value.deloadPct })}</Stamp>}
@@ -282,11 +201,6 @@ function MoveDetail({ plan, step, date }: { plan: PlannedDay; step: Step; date: 
       <SetCells move={move} target={spec.sets} />
 
       <div class="move-actions">
-        {manualRest && (
-          <Button variant="secondary" icon="timer" onClick={() => startRest(step.moveIdx, move.sets.length >= spec.sets)}>
-            {t('move.restTimer')}
-          </Button>
-        )}
         {move.sets.length > 0 && (
           <Button variant="text" icon="undo" onClick={() => undoSet(date, step.moveIdx)}>
             {t('move.undoSet')}
@@ -319,17 +233,8 @@ export function SetCells({ move, target }: { move: MoveLog; target: number }) {
         return (
           <li key={i} class={`set-cell${s ? ' filled' : ''}`}>
             <span class="set-cell-n">{i + 1}</span>
-            <span class="set-cell-v mono" aria-hidden="true">
-              {!s ? (
-                '–'
-              ) : move.bodyweight || s.kg === null ? (
-                t('move.cellBw', { reps: s.reps })
-              ) : (
-                <>
-                  <span>{fmtKg(s.kg)}</span>
-                  <span class="set-cell-reps">{t('move.cellReps', { reps: s.reps })}</span>
-                </>
-              )}
+            <span class="set-cell-v mono">
+              {s ? (move.bodyweight || s.kg === null ? `${s.reps}` : `${fmtNum(s.kg, 2)}×${s.reps}`) : '–'}
             </span>
             <span class="visually-hidden">
               {s
@@ -450,15 +355,14 @@ function Dock({
     );
   } else if (focus.kind === 'move' && !focus.skipped) {
     action = <SetForm plan={plan} step={focus} />;
-  } else if (focus.kind === 'warmup' || focus.kind === 'cardio' || focus.kind === 'cooldown') {
+  } else if (focus.kind === 'warmup' || focus.kind === 'cardio') {
     const kind = focus.kind;
     const running = timer?.kind === kind;
-    const minutes = kind === 'warmup' ? spec.warmupMin : kind === 'cardio' ? spec.cardioMin : spec.cooldownMin;
     action = (
       <div class="dock-row">
         {!running && !focus.done && (
           <Button variant="secondary" icon="timer" onClick={() => startTimer(kind, focus.index)}>
-            {t('session.startTimer', { time: fmtDuration(minutes * 60_000) })}
+            {t('session.startTimer', { time: fmtDuration(kind === 'warmup' ? spec.warmupMin * 60_000 : spec.cardioMin * 60_000) })}
           </Button>
         )}
         <Button
@@ -468,7 +372,7 @@ function Dock({
           onClick={() => setStepDone(date, kind, !focus.done)}
           disabled={focus.done}
         >
-          {t(TIMED_DONE[kind])}
+          {t(kind === 'warmup' ? 'session.warmupDone' : 'session.cardioDone')}
         </Button>
       </div>
     );
@@ -529,12 +433,9 @@ function SetForm({ plan, step }: { plan: PlannedDay; step: Step }) {
   const spec = program.value.session;
   const info = moveInfo(plan, move, step.moveIdx);
   const lastSetKg = move.sets.length ? move.sets[move.sets.length - 1].kg : null;
-  // The latest weight for this move (this session, else last time) is the placeholder;
-  // logging with the field left empty uses it.
-  const lastUsedKg = lastSetKg ?? info.prefill;
+  const defaultKg = lastSetKg ?? info.prefill;
   const draft = active.value?.drafts[step.moveIdx];
-  const [kg, setKg] = useState(draft?.kg ?? '');
-  const kgHintId = useId();
+  const [kg, setKg] = useState(draft?.kg ?? (defaultKg !== null ? String(defaultKg) : ''));
   const [reps, setReps] = useState(draft?.reps ?? String(spec.reps));
   const [error, setError] = useState<MessageKey | null>(null);
   const kgId = useId();
@@ -544,7 +445,7 @@ function SetForm({ plan, step }: { plan: PlannedDay; step: Step }) {
   // New move in focus → reset fields to that move's defaults.
   useEffect(() => {
     const d = active.value?.drafts[step.moveIdx];
-    setKg(d?.kg ?? '');
+    setKg(d?.kg ?? (defaultKg !== null ? String(defaultKg) : ''));
     setReps(d?.reps ?? String(spec.reps));
     setError(null);
   }, [step.moveIdx, move.name]);
@@ -556,7 +457,7 @@ function SetForm({ plan, step }: { plan: PlannedDay; step: Step }) {
     if (r === null || r === 0) return setError('form.repsInvalid');
     let k: number | null = null;
     if (!move.bodyweight) {
-      k = kg.trim() === '' && lastUsedKg !== null ? lastUsedKg : validKg(kg);
+      k = validKg(kg);
       if (k === null) return setError('form.kgInvalid');
     }
     setError(null);
@@ -567,8 +468,6 @@ function SetForm({ plan, step }: { plan: PlannedDay; step: Step }) {
         : t('move.logged', { n: move.sets.length + 1, kg: fmtKg(k), reps: r }),
     );
     setReps(String(spec.reps));
-    setKg('');
-    persist('', String(spec.reps));
   };
 
   const persist = (k: string, r: string) => setDraft(step.moveIdx, k, r);
@@ -591,19 +490,14 @@ function SetForm({ plan, step }: { plan: PlannedDay; step: Step }) {
             autocomplete="off"
             value={kg}
             aria-invalid={error === 'form.kgInvalid'}
-            aria-describedby={[error ? errId : '', lastUsedKg !== null ? kgHintId : ''].filter(Boolean).join(' ') || undefined}
-            placeholder={lastUsedKg !== null ? fmtNum(lastUsedKg, 2) : '0'}
+            aria-describedby={error ? errId : undefined}
+            placeholder="0"
             onInput={(e) => {
               setKg(e.currentTarget.value);
               persist(e.currentTarget.value, reps);
             }}
             onFocus={(e) => e.currentTarget.select()}
           />
-          {lastUsedKg !== null && (
-            <span id={kgHintId} class="visually-hidden">
-              {t('form.kgLast', { kg: fmtKg(lastUsedKg) })}
-            </span>
-          )}
         </div>
       )}
       <div class="field field-reps">

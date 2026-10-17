@@ -1,8 +1,7 @@
 import type { PlannedDay } from './program';
 import type { DayLog, MoveLog, SessionSpec } from './types';
 
-export type StepKind = 'warmup' | 'cardio' | 'move' | 'cooldown';
-export type TimedStepKind = 'warmup' | 'cardio' | 'cooldown';
+export type StepKind = 'warmup' | 'cardio' | 'move';
 
 export interface Step {
   index: number;
@@ -37,8 +36,6 @@ export function buildSteps(plan: PlannedDay, log: DayLog | undefined, spec: Sess
       move: m,
     }),
   );
-  if (spec.cooldownMin > 0)
-    steps.push({ index: steps.length, kind: 'cooldown', moveIdx: -1, done: !!log?.cooldown, skipped: false, setsDone: 0 });
   return steps;
 }
 

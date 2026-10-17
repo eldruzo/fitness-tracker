@@ -861,15 +861,8 @@ select.input {
   color: var(--ink-3);
 }
 .set-cell-v {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.15;
   font-weight: 600;
   font-size: var(--step--1);
-}
-.set-cell-reps {
-  font-weight: 500;
 }
 .set-cell.filled {
   background: var(--ink);
@@ -897,71 +890,6 @@ select.input {
   flex-direction: column;
   align-items: start;
   gap: var(--s2);
-}
-/* Exercise pictures: start and end position side by side. Photos are white-backed,
-   so they sit in a hairline frame and are dimmed slightly in dark mode. */
-.ex-figure {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s2);
-  margin: 0 0 var(--s3);
-  max-width: 26rem;
-}
-.ex-figure img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border: 1px solid var(--rule);
-  background: var(--surface-2);
-}
-.routine {
-  width: 100%;
-  border-top: 1px solid var(--rule);
-}
-.routine > li {
-  border-bottom: 1px solid var(--rule);
-}
-.routine-item > summary {
-  gap: var(--s3);
-  padding: var(--s1) 0;
-}
-.routine-item > summary::before {
-  display: none;
-}
-.routine-item[open] > summary {
-  color: var(--accent-ink);
-}
-.routine-thumb {
-  flex: none;
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border: 1px solid var(--rule);
-  background: var(--surface-2);
-}
-.routine-name {
-  flex: 1;
-  min-width: 0;
-}
-.routine-dose {
-  font-size: var(--step--1);
-  font-weight: 500;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.routine-item .ex-figure {
-  margin-top: var(--s2);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .ex-figure img,
-  :root:not([data-theme='light']) .routine-thumb {
-    filter: brightness(0.88);
-  }
-}
-:root[data-theme='dark'] .ex-figure img,
-:root[data-theme='dark'] .routine-thumb {
-  filter: brightness(0.88);
 }
 .swap-note {
   display: flex;
@@ -1230,44 +1158,6 @@ select.input {
 }
 
 /* Counters */
-/* Accent swatches: each button carries data-accent, so its dot previews that preset. */
-.swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s2);
-}
-.swatch {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s2);
-  min-height: var(--tap);
-  padding: 0 var(--s3);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-weight: 600;
-  font-size: var(--step--1);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-stretch: 85%;
-}
-.swatch.on {
-  border: 2px solid var(--ink);
-}
-.swatch-dot {
-  width: 18px;
-  height: 18px;
-  background: var(--accent);
-  forced-color-adjust: none;
-}
-.counters-fold > summary {
-  margin: 0;
-}
-.counters-fold > summary .hint {
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0;
-}
 .counters {
   margin-top: var(--s5);
 }
@@ -1368,13 +1258,6 @@ select.input {
 }
 .compact-table {
   margin-top: var(--s2);
-}
-/* "20 kg × 12 · 22.5 kg × 12 …": wraps between sets, never inside one. */
-.table .set-list {
-  white-space: normal;
-}
-.set-list span {
-  white-space: nowrap;
 }
 .empty {
   border: 1px dashed var(--ink-3);
@@ -2090,183 +1973,4 @@ details[open] > summary::before {
 .step,
 .dialog-body {
   position: relative;
-}
-
-/* ─── Setup wizard ────────────────────────────────────────────────────── */
-.setup-progress {
-  height: 4px;
-  margin-top: var(--s3);
-  background: var(--rule);
-}
-.setup-progress span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  transform-origin: left;
-  transition: transform var(--dur) var(--ease);
-}
-.setup-step {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--s2);
-}
-.setup-step > .segmented {
-  align-self: start;
-}
-.setup-offline {
-  margin-top: var(--s4);
-  padding-top: var(--s3);
-  border-top: 1px solid var(--rule);
-}
-.setup-split {
-  font-weight: 600;
-  font-size: var(--step--1);
-}
-.choices {
-  display: grid;
-  gap: var(--s2);
-}
-.choice {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-  min-height: 56px;
-  padding: var(--s2) var(--s3);
-  text-align: left;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-.choice.on {
-  border: 2px solid var(--accent);
-  background: var(--accent-soft);
-}
-.choice-mark {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border: 1.5px solid var(--ink-3);
-  border-radius: 50%;
-}
-.choice.on .choice-mark {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-.choice-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.choice-label {
-  font-weight: 700;
-}
-.day-chips {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--s1);
-}
-.day-chip {
-  min-height: var(--tap);
-  border: 1px solid var(--ink-3);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-weight: 700;
-  font-size: var(--step--1);
-  font-stretch: 85%;
-  text-transform: uppercase;
-}
-.day-chip.on {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
-}
-.day-chip:disabled {
-  opacity: 0.4;
-}
-.setup-stepper {
-  justify-content: space-between;
-  border-bottom: 1px solid var(--rule);
-  padding: var(--s1) 0;
-}
-.stepper-value {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: stretch;
-  min-width: 2.5rem;
-  color: var(--ink);
-  font-weight: 700;
-  font-size: var(--step-1);
-}
-.setup-shuffle {
-  align-self: start;
-}
-.setup-week {
-  border-top: 1px solid var(--rule-strong);
-}
-.setup-week > li {
-  display: grid;
-  grid-template-columns: 3rem 1fr;
-  gap: var(--s3);
-  padding: var(--s3) 0;
-  border-bottom: 1px solid var(--rule);
-}
-.setup-wd {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--accent-ink);
-  text-transform: uppercase;
-}
-.setup-week > li.is-rest .setup-wd,
-.setup-week > li.is-rest .setup-focus {
-  color: var(--ink-3);
-}
-.setup-focus {
-  font-weight: 700;
-  font-stretch: 85%;
-}
-.setup-moves {
-  margin-top: var(--s1);
-  color: var(--ink-2);
-  font-size: var(--step--1);
-  list-style: decimal inside;
-}
-/* Same pinning as the session dock: above the tab bar on phones, bottom edge on desktop. */
-.setup-nav {
-  position: sticky;
-  bottom: calc(var(--nav-h) + var(--safe-b));
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin: var(--s5) calc(-1 * var(--s4)) 0;
-  padding: var(--s3) var(--s4);
-  background: var(--bg);
-  border-top: 2px solid var(--rule-strong);
-}
-@media (min-width: 900px) {
-  .setup-nav {
-    bottom: var(--safe-b);
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-.setup-nav .btn-primary {
-  flex: 1;
-  max-width: 20rem;
-}
-.rerun {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: var(--s2);
-  padding-bottom: var(--s4);
-  margin-bottom: var(--s3);
-  border-bottom: 1px solid var(--rule);
 }

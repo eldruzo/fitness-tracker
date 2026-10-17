@@ -9,7 +9,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.clock.install({ time: new Date(date) });
 await page.goto('http://localhost:4173/');
-await page.getByRole('button', { name: 'Use the sample plan' }).click().catch(() => {});
+await page.getByRole('button', { name: 'Start', exact: true }).click().catch(() => {});
 await page.waitForTimeout(300);
 const shots = (process.env.SHOTS ?? 'today').split(',');
 for (const s of shots) {

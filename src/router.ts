@@ -6,8 +6,7 @@ export type Route =
   | { name: 'day'; date: string }
   | { name: 'progress'; move?: string }
   | { name: 'body' }
-  | { name: 'settings'; section?: string }
-  | { name: 'setup' };
+  | { name: 'settings'; section?: string };
 
 export function parse(hash: string): Route {
   const [path, ...rest] = hash.replace(/^#\/?/, '').split('/');
@@ -23,8 +22,6 @@ export function parse(hash: string): Route {
       return { name: 'body' };
     case 'settings':
       return { name: 'settings', section: arg };
-    case 'setup':
-      return { name: 'setup' };
     default:
       return { name: 'today' };
   }
@@ -44,8 +41,6 @@ export function href(r: Route): string {
       return '#/body';
     case 'settings':
       return r.section ? `#/settings/${r.section}` : '#/settings';
-    case 'setup':
-      return '#/setup';
   }
 }
 
