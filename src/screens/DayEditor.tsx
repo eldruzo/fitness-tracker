@@ -123,6 +123,14 @@ export function DayEditor({ date }: { date: string }) {
               {moves.map((m, i) => (
                 <MoveEditor key={`${i}-${m.name}`} date={date} move={m} idx={i} />
               ))}
+              {prog.session.cooldownMin > 0 && (
+                <label class="check-row">
+                  <input type="checkbox" checked={!!log?.cooldown} onChange={(e) => setStepDone(date, 'cooldown', e.currentTarget.checked)} />
+                  <span>
+                    {t('session.cooldown')} · {t('session.minutes', { n: prog.session.cooldownMin })}
+                  </span>
+                </label>
+              )}
             </section>
           )}
           {!p.rest && isFuture && (

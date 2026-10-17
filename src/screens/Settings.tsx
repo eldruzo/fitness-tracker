@@ -3,11 +3,16 @@ import { requestNotifications } from '../effects';
 import { fmtDate, t, tn, type MessageKey } from '../i18n';
 import { backupFilename, BackupError, type ParsedBackup } from '../lib/backup';
 import { diffDays, isDateKey, type DateKey } from '../lib/dates';
+import { allProgramImageUrls, AVG_IMAGE_KB, ensureExerciseIndex, saveImagesOffline } from '../lib/exercises';
 import { isBodyweightName, validatePhases } from '../lib/program';
+import { allMoveNames } from '../lib/progress';
 import type { Program, Theme } from '../lib/types';
+import { ACCENTS } from '../lib/validate';
+import { go } from '../router';
 import { installEvent, isIos, isStandalone, offlineReady, promptInstall } from '../pwa';
 import {
   exportBackupJson,
+  histories,
   lastShiftId,
   meta,
   parseBackup,
@@ -152,6 +157,12 @@ function TrainingOptions() {
       )}
       <Toggle label={t('settings.sound')} checked={s.sound} onChange={(v) => updateSettings({ sound: v })} />
       <Toggle label={t('settings.vibrate')} checked={s.vibrate} onChange={(v) => updateSettings({ vibrate: v })} />
+      <Toggle
+        label={t('settings.autoStart')}
+        hint={t('settings.autoStartHint')}
+        checked={s.autoStart}
+        onChange={(v) => updateSettings({ autoStart: v })}
+      />
       <div class="field-inline">
         <span>{t('settings.notifications')}</span>
         {notif === 'default' ? (
@@ -198,6 +209,12 @@ function ProgramDates() {
 
   return (
     <Section id="set-program" title={t('settings.program')}>
+      <div class="rerun">
+        <p class="hint">{t('setup.rerunHint')}</p>
+        <Button variant="secondary" icon="swap" onClick={() => go({ name: 'setup' })}>
+          {t('setup.rerun')}
+        </Button>
+      </div>
       <p class="hint">{t('settings.programHint')}</p>
       <div class="form-grid">
         <div class="field">
@@ -241,6 +258,7 @@ function ProgramDates() {
           [
             ['warmupMin', 'settings.warmupMin', 0, 60],
             ['cardioMin', 'settings.cardioMin', 0, 120],
+            ['cooldownMin', 'settings.cooldownMin', 0, 60],
             ['sets', 'settings.sets', 1, 10],
             ['reps', 'settings.reps', 1, 100],
             ['restSetSec', 'settings.restSet', 0, 900],
@@ -306,7 +324,6 @@ function MovesEditor() {
               <div class="moves-day">
                 <span class="moves-wd">{t(`weekday.${wd}` as MessageKey)}</span>
                 <span class="moves-focus">{w.rest ? t('today.restDay') : w.focus}</span>
-                <span class="stamp">{t(`work.${w.work}`)}</span>
                 <button type="button" class="btn btn-text btn-sm" onClick={() => setFocusEdit(wd)}>
                   {t('common.edit')}
                   <span class="visually-hidden"> {t(`weekday.${wd}` as MessageKey)}</span>
@@ -412,11 +429,10 @@ function DayEditDialog({ wd, onClose }: { wd: number; onClose: () => void }) {
   const w = p.weekdays[wd];
   const [focus, setFocus] = useState(w.focus);
   const [intensity, setIntensity] = useState(w.intensity);
-  const [work, setWork] = useState(w.work);
   const id = useId();
   const save = () => {
     const next = structuredClone(p);
-    next.weekdays[wd] = { ...w, focus: focus.trim() || w.focus, intensity: intensity.trim(), work };
+    next.weekdays[wd] = { ...w, focus: focus.trim() || w.focus, intensity: intensity.trim() };
     updateProgram(next);
     onClose();
   };
@@ -443,15 +459,6 @@ function DayEditDialog({ wd, onClose }: { wd: number; onClose: () => void }) {
       <div class="field">
         <label for={`${id}-i`}>{t('settings.intensity')}</label>
         <input id={`${id}-i`} class="input" value={intensity} maxLength={30} onInput={(e) => setIntensity(e.currentTarget.value)} />
-      </div>
-      <div class="field">
-        <span class="label">{t('settings.workTag')}</span>
-        <Segmented
-          label={t('settings.workTag')}
-          value={work}
-          onChange={setWork}
-          options={(['WFO', 'WFH', 'Off'] as const).map((v) => ({ value: v, label: t(`work.${v}`) }))}
-        />
       </div>
       {w.rest && <p class="hint">{t('settings.restFixed')}</p>}
     </Dialog>
@@ -537,11 +544,68 @@ function Appearance() {
           ]}
         />
       </div>
+      <div class="field">
+        <span class="label" id="accent-label">
+          {t('settings.accent')}
+        </span>
+        <div class="swatches" role="radiogroup" aria-labelledby="accent-label">
+          {ACCENTS.map((a) => (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={s.accent === a}
+              class={`swatch${s.accent === a ? ' on' : ''}`}
+              data-accent={a}
+              onClick={() => updateSettings({ accent: a })}
+              key={a}
+            >
+              <span class="swatch-dot" aria-hidden="true" />
+              {t(`settings.accent.${a}`)}
+            </button>
+          ))}
+        </div>
+      </div>
       <div class="field-inline">
         <span>{t('settings.units')}</span>
         <span class="mono">kg</span>
       </div>
+      <OfflineImages />
     </Section>
+  );
+}
+
+function OfflineImages() {
+  const [state, setState] = useState<{ done: number; total: number; ok: number | null } | null>(null);
+  const names = allMoveNames(program.value, histories.value).map((n) => n.name);
+  const estimateMb = Math.max(1, Math.round((allProgramImageUrls(names).length * AVG_IMAGE_KB) / 1024));
+  const run = async () => {
+    await ensureExerciseIndex().catch(() => undefined);
+    const urls = allProgramImageUrls(names);
+    setState({ done: 0, total: urls.length, ok: null });
+    const ok = await saveImagesOffline(urls, (done) => setState({ done, total: urls.length, ok: null }));
+    setState({ done: urls.length, total: urls.length, ok });
+  };
+  const busy = state !== null && state.ok === null;
+  return (
+    <div class="field">
+      <span class="label">{t('settings.images')}</span>
+      <p class="hint">{t('settings.imagesHint', { mb: estimateMb })}</p>
+      <div class="row-actions">
+        <Button variant="secondary" icon="download" disabled={busy} onClick={() => void run()}>
+          {t('settings.imagesSave')}
+        </Button>
+        {state && (
+          <span class="hint" role="status">
+            {busy
+              ? t('settings.imagesSaving', { done: state.done, total: state.total })
+              : state.ok === state.total
+                ? t('settings.imagesDone', { done: state.ok })
+                : t('settings.imagesFailed', { done: state.ok ?? 0, total: state.total })}
+          </span>
+        )}
+      </div>
+      <p class="hint">{t('settings.imagesCredit')}</p>
+    </div>
   );
 }
 

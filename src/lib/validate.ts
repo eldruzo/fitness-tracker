@@ -1,6 +1,7 @@
 import { isDateKey } from './dates';
 import { defaultSettings, seedProgram } from './program';
 import type {
+  Accent,
   BodyEntry,
   Counters,
   DayLog,
@@ -20,6 +21,8 @@ import type {
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const num = (v: unknown, lo: number, hi: number): number | null =>
   typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi ? v : null;
+
+export const ACCENTS: Accent[] = ['orange', 'blue', 'teal', 'purple', 'pink'];
 
 export const KG_MIN = 0;
 export const KG_MAX = 500;
@@ -52,6 +55,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     deload: bool('deload'),
     deloadPct: num(raw.deloadPct, 30, 100) ?? d.deloadPct,
     theme: raw.theme === 'light' || raw.theme === 'dark' || raw.theme === 'system' ? raw.theme : d.theme,
+    accent: ACCENTS.includes(raw.accent as Accent) ? (raw.accent as Accent) : d.accent,
     unit: 'kg',
     hints: bool('hints'),
     progression: bool('progression'),
@@ -61,6 +65,7 @@ export function sanitizeSettings(raw: unknown): Settings {
     counterTarget: num(raw.counterTarget, 5, 1000) ?? d.counterTarget,
     sound: bool('sound'),
     vibrate: bool('vibrate'),
+    autoStart: bool('autoStart'),
     pauses,
   };
 }
@@ -86,7 +91,6 @@ export function sanitizeProgram(raw: unknown): Program {
       return {
         focus: typeof w.focus === 'string' ? w.focus : seed.weekdays[i].focus,
         intensity: typeof w.intensity === 'string' ? w.intensity : '',
-        work: w.work === 'WFO' || w.work === 'WFH' || w.work === 'Off' ? w.work : seed.weekdays[i].work,
         rest: w.rest === true,
         groups: Array.isArray(w.groups)
           ? (w.groups.filter((g) => ['push', 'pull', 'hinge', 'arms', 'core'].includes(g as string)) as Program['weekdays'][number]['groups'])
@@ -106,6 +110,7 @@ export function sanitizeProgram(raw: unknown): Program {
     const session = {
       warmupMin: num(s.warmupMin, 0, 60) ?? seed.session.warmupMin,
       cardioMin: num(s.cardioMin, 0, 120) ?? seed.session.cardioMin,
+      cooldownMin: num(s.cooldownMin, 0, 60) ?? seed.session.cooldownMin,
       sets: num(s.sets, 1, 10) ?? seed.session.sets,
       reps: num(s.reps, 1, 100) ?? seed.session.reps,
       restSetSec: num(s.restSetSec, 0, 900) ?? seed.session.restSetSec,
@@ -146,6 +151,7 @@ export function sanitizeLog(raw: unknown): DayLog | null {
     moves: Array.isArray(raw.moves) ? (raw.moves.map(sanitizeMoveLog).filter(Boolean) as MoveLog[]) : [],
     updatedAt: typeof raw.updatedAt === 'number' ? raw.updatedAt : Date.now(),
   };
+  if (raw.cooldown === true) log.cooldown = true;
   if (typeof raw.startedAt === 'number') log.startedAt = raw.startedAt;
   if (typeof raw.finishedAt === 'number') log.finishedAt = raw.finishedAt;
   if (raw.ack === true) log.ack = true;

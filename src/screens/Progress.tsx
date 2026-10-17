@@ -7,6 +7,7 @@ import { ctx, histories, program, today } from '../state';
 import { EmptyState } from '../ui/components';
 import { Icon } from '../ui/icons';
 import { LineChart } from '../ui/LineChart';
+import { ShareWeek } from '../ui/ShareWeek';
 
 export default function Progress() {
   const r = route.value;
@@ -45,6 +46,9 @@ function Overview() {
         </div>
       </dl>
       <p class="hint">{t('stats.note', { missed: s.missed, partial: s.partial, remaining: s.remaining })}</p>
+      <div class="row-actions">
+        <ShareWeek />
+      </div>
 
       <h2 class="section-label">{t('progress.moves')}</h2>
       {!logged.length ? (

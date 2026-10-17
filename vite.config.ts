@@ -17,7 +17,7 @@ export default defineConfig({
         id: './',
         name: 'Gym Log',
         short_name: 'Gym Log',
-        description: 'Offline training log for a 16-week, 6-day plan.',
+        description: 'Offline training log with a plan built for you.',
         lang: 'en',
         start_url: './',
         scope: './',
@@ -37,6 +37,18 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,woff2,png,svg,ico,webmanifest}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        // Exercise pictures: fetched on first view, then served from the cache (offline too).
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.origin === 'https://cdn.jsdelivr.net' && url.pathname.includes('/free-exercise-db@'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'exercise-images',
+              expiration: { maxEntries: 400, maxAgeSeconds: 365 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
     }),
   ],
