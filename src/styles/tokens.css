@@ -101,3 +101,107 @@
   --danger: #ff9b8a;
   --focus: #8fb3ff;
 }
+
+/* Accent presets (Settings → Appearance). Also valid on any element, so swatches can preview them. */
+[data-accent='orange'] {
+  --accent: #b23e0b;
+  --accent-ink: #9c3509;
+  --on-accent: #ffffff;
+  --accent-soft: #f6dfd1;
+}
+[data-accent='blue'] {
+  --accent: #1f5fbf;
+  --accent-ink: #1a50a3;
+  --on-accent: #ffffff;
+  --accent-soft: #dce6f5;
+}
+[data-accent='teal'] {
+  --accent: #0d6e6a;
+  --accent-ink: #0a5c58;
+  --on-accent: #ffffff;
+  --accent-soft: #d4ebe7;
+}
+[data-accent='purple'] {
+  --accent: #6b3fb3;
+  --accent-ink: #5b339c;
+  --on-accent: #ffffff;
+  --accent-soft: #e7ddf4;
+}
+[data-accent='pink'] {
+  --accent: #ad2f68;
+  --accent-ink: #952859;
+  --on-accent: #ffffff;
+  --accent-soft: #f4dae6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light'])[data-accent='orange'],
+  :root:not([data-theme='light']) [data-accent='orange'] {
+    --accent: #ff8f52;
+    --accent-ink: #ffa877;
+    --on-accent: #1a0d05;
+    --accent-soft: #3a2316;
+  }
+  :root:not([data-theme='light'])[data-accent='blue'],
+  :root:not([data-theme='light']) [data-accent='blue'] {
+    --accent: #7fb0ff;
+    --accent-ink: #a3c6ff;
+    --on-accent: #06142b;
+    --accent-soft: #1c2a40;
+  }
+  :root:not([data-theme='light'])[data-accent='teal'],
+  :root:not([data-theme='light']) [data-accent='teal'] {
+    --accent: #5fd0c6;
+    --accent-ink: #8ee0d8;
+    --on-accent: #04201e;
+    --accent-soft: #15312f;
+  }
+  :root:not([data-theme='light'])[data-accent='purple'],
+  :root:not([data-theme='light']) [data-accent='purple'] {
+    --accent: #c4a2ff;
+    --accent-ink: #d6bdff;
+    --on-accent: #1d0d36;
+    --accent-soft: #2d2240;
+  }
+  :root:not([data-theme='light'])[data-accent='pink'],
+  :root:not([data-theme='light']) [data-accent='pink'] {
+    --accent: #ff8ab8;
+    --accent-ink: #ffadcd;
+    --on-accent: #2e0a1a;
+    --accent-soft: #3b1d2a;
+  }
+}
+:root[data-theme='dark'][data-accent='orange'],
+:root[data-theme='dark'] [data-accent='orange'] {
+  --accent: #ff8f52;
+  --accent-ink: #ffa877;
+  --on-accent: #1a0d05;
+  --accent-soft: #3a2316;
+}
+:root[data-theme='dark'][data-accent='blue'],
+:root[data-theme='dark'] [data-accent='blue'] {
+  --accent: #7fb0ff;
+  --accent-ink: #a3c6ff;
+  --on-accent: #06142b;
+  --accent-soft: #1c2a40;
+}
+:root[data-theme='dark'][data-accent='teal'],
+:root[data-theme='dark'] [data-accent='teal'] {
+  --accent: #5fd0c6;
+  --accent-ink: #8ee0d8;
+  --on-accent: #04201e;
+  --accent-soft: #15312f;
+}
+:root[data-theme='dark'][data-accent='purple'],
+:root[data-theme='dark'] [data-accent='purple'] {
+  --accent: #c4a2ff;
+  --accent-ink: #d6bdff;
+  --on-accent: #1d0d36;
+  --accent-soft: #2d2240;
+}
+:root[data-theme='dark'][data-accent='pink'],
+:root[data-theme='dark'] [data-accent='pink'] {
+  --accent: #ff8ab8;
+  --accent-ink: #ffadcd;
+  --on-accent: #2e0a1a;
+  --accent-soft: #3b1d2a;
+}

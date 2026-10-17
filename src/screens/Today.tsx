@@ -1,9 +1,10 @@
-import { fmtDate, fmtNum, fmtPct, fmtWeekday, t, tn } from '../i18n';
+import { fmtDate, fmtNum, fmtPct, fmtSet, fmtWeekday, t, tn } from '../i18n';
 import { addDays, diffDays, type DateKey } from '../lib/dates';
 import { moveKey, planFor, type PlannedDay } from '../lib/program';
 import { summarize } from '../lib/progress';
 import { computeStats } from '../lib/schedule';
 import { summarizeSession } from '../lib/session';
+import type { Counters } from '../lib/types';
 import { go } from '../router';
 import {
   addCount,
@@ -25,6 +26,7 @@ import {
 } from '../state';
 import { Button, Stamp } from '../ui/components';
 import { Icon } from '../ui/icons';
+import { ShareWeek } from '../ui/ShareWeek';
 import { BackupReminder, GapHint, InstallBanner, MissedBanner, PersistBanner } from './today/Banners';
 import { Session } from './today/Session';
 import { FirstRun } from './FirstRun';
@@ -37,7 +39,6 @@ export function Today() {
   if (d > p.endDate) return <ProgramComplete />;
 
   const plan = todayPlan.value;
-  const log = logs.value.get(d);
   const active = sessionActive.value;
 
   return (
@@ -51,7 +52,7 @@ export function Today() {
         {!active && <InstallBanner />}
       </div>
       <TodayBody plan={plan} />
-      {log?.status !== 'active' && settings.value.counters && <DailyCounters date={d} />}
+      {settings.value.counters && (active ? <DailyCounters date={d} collapsible /> : <DailyCounters date={d} />)}
     </div>
   );
 }
@@ -197,10 +198,15 @@ function DoneSummary({ date }: { date: DateKey }) {
           {log.moves.map((m) => (
             <tr key={m.name}>
               <th scope="row">{m.name}</th>
-              <td class="num mono">
+              <td class="num mono set-list">
                 {m.skipped
                   ? t('session.skipped')
-                  : m.sets.map((x) => (m.bodyweight || x.kg === null ? `${x.reps}` : `${fmtNum(x.kg, 2)}×${x.reps}`)).join('  ')}
+                  : m.sets.map((x, i) => (
+                      <>
+                        {i > 0 && ' · '}
+                        <span>{fmtSet(m.bodyweight, x.kg, x.reps)}</span>
+                      </>
+                    ))}
               </td>
             </tr>
           ))}
@@ -214,18 +220,42 @@ function DoneSummary({ date }: { date: DateKey }) {
           {t('today.reopen')}
         </Button>
       </div>
+      <div class="row-actions">
+        <ShareWeek variant="primary" />
+      </div>
     </section>
   );
 }
 
-function DailyCounters({ date }: { date: DateKey }) {
+/** During a session the counters fold away so they don't push the steps down. */
+function DailyCounters({ date, collapsible }: { date: DateKey; collapsible?: boolean }) {
   const c = counters.value.get(date);
   const target = settings.value.counterTarget;
+  const body = <CounterRows date={date} c={c} target={target} />;
+  if (collapsible) {
+    const total = (['squats', 'tiptoe'] as const).reduce((a, k) => a + (c?.[k] ?? []).reduce((x, y) => x + y, 0), 0);
+    return (
+      <details class="counters counters-fold">
+        <summary class="section-label">
+          {t('counters.title')} <span class="mono hint">{t('counters.foldTotal', { n: total })}</span>
+        </summary>
+        {body}
+      </details>
+    );
+  }
   return (
     <section class="counters" aria-labelledby="counters-h">
       <h2 id="counters-h" class="section-label">
         {t('counters.title')}
       </h2>
+      {body}
+    </section>
+  );
+}
+
+function CounterRows({ date, c, target }: { date: DateKey; c: Counters | undefined; target: number }) {
+  return (
+    <>
       {(['squats', 'tiptoe'] as const).map((k) => {
         const list = c?.[k] ?? [];
         const total = list.reduce((a, b) => a + b, 0);
@@ -269,7 +299,7 @@ function DailyCounters({ date }: { date: DateKey }) {
           </div>
         );
       })}
-    </section>
+    </>
   );
 }
 
@@ -301,6 +331,7 @@ function BeforeStart({ date }: { date: DateKey }) {
           {first.moves.map((m) => (
             <li key={m.name}>{m.name}</li>
           ))}
+          {p.session.cooldownMin > 0 && <li>{t('session.cooldown')}</li>}
         </ol>
         <Button variant="secondary" onClick={() => go({ name: 'plan' })}>
           {t('today.seePlan')}

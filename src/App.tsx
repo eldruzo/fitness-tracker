@@ -53,6 +53,12 @@ function useTheme() {
     const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute('content', dark ? '#121211' : '#F4F1EA');
   }, [theme]);
+  const accent = settings.value.accent;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (accent === 'orange') root.removeAttribute('data-accent');
+    else root.setAttribute('data-accent', accent);
+  }, [accent]);
 }
 
 export function App() {

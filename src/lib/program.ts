@@ -92,7 +92,7 @@ export function seedProgram(): Program {
         sun: ['Lat pulldown', 'Single-arm dumbbell row', 'Lying leg curl'],
       }),
     },
-    session: { warmupMin: 5, cardioMin: 10, sets: 4, reps: 12, restSetSec: 180, restMoveSec: 300 },
+    session: { warmupMin: 5, cardioMin: 10, cooldownMin: 10, sets: 4, reps: 12, restSetSec: 180, restMoveSec: 300 },
   };
 }
 
@@ -101,6 +101,7 @@ export function defaultSettings(): Settings {
     deload: true,
     deloadPct: 70,
     theme: 'system',
+    accent: 'orange',
     unit: 'kg',
     hints: true,
     progression: false,
@@ -110,6 +111,7 @@ export function defaultSettings(): Settings {
     counterTarget: 50,
     sound: true,
     vibrate: true,
+    autoStart: true,
     pauses: [],
   };
 }

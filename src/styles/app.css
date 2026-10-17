@@ -861,8 +861,15 @@ select.input {
   color: var(--ink-3);
 }
 .set-cell-v {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
   font-weight: 600;
   font-size: var(--step--1);
+}
+.set-cell-reps {
+  font-weight: 500;
 }
 .set-cell.filled {
   background: var(--ink);
@@ -890,6 +897,71 @@ select.input {
   flex-direction: column;
   align-items: start;
   gap: var(--s2);
+}
+/* Exercise pictures: start and end position side by side. Photos are white-backed,
+   so they sit in a hairline frame and are dimmed slightly in dark mode. */
+.ex-figure {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+  margin: 0 0 var(--s3);
+  max-width: 26rem;
+}
+.ex-figure img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+.routine {
+  width: 100%;
+  border-top: 1px solid var(--rule);
+}
+.routine > li {
+  border-bottom: 1px solid var(--rule);
+}
+.routine-item > summary {
+  gap: var(--s3);
+  padding: var(--s1) 0;
+}
+.routine-item > summary::before {
+  display: none;
+}
+.routine-item[open] > summary {
+  color: var(--accent-ink);
+}
+.routine-thumb {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+.routine-name {
+  flex: 1;
+  min-width: 0;
+}
+.routine-dose {
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.routine-item .ex-figure {
+  margin-top: var(--s2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .ex-figure img,
+  :root:not([data-theme='light']) .routine-thumb {
+    filter: brightness(0.88);
+  }
+}
+:root[data-theme='dark'] .ex-figure img,
+:root[data-theme='dark'] .routine-thumb {
+  filter: brightness(0.88);
 }
 .swap-note {
   display: flex;
@@ -1158,6 +1230,44 @@ select.input {
 }
 
 /* Counters */
+/* Accent swatches: each button carries data-accent, so its dot previews that preset. */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: var(--tap);
+  padding: 0 var(--s3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-weight: 600;
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-stretch: 85%;
+}
+.swatch.on {
+  border: 2px solid var(--ink);
+}
+.swatch-dot {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  forced-color-adjust: none;
+}
+.counters-fold > summary {
+  margin: 0;
+}
+.counters-fold > summary .hint {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
 .counters {
   margin-top: var(--s5);
 }
@@ -1258,6 +1368,13 @@ select.input {
 }
 .compact-table {
   margin-top: var(--s2);
+}
+/* "20 kg × 12 · 22.5 kg × 12 …": wraps between sets, never inside one. */
+.table .set-list {
+  white-space: normal;
+}
+.set-list span {
+  white-space: nowrap;
 }
 .empty {
   border: 1px dashed var(--ink-3);

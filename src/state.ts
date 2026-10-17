@@ -21,6 +21,7 @@ import type {
   TimerKind,
   TimerState,
 } from './lib/types';
+import type { TimedStepKind } from './lib/session';
 import {
   sanitizeBody,
   sanitizeCounters,
@@ -321,7 +322,7 @@ export function startSession(date: DateKey) {
   const l = ensureLog(date);
   if (l.status !== 'active') setLog({ ...l, status: 'active', startedAt: l.startedAt ?? Date.now() });
   if (!active.value || active.value.date !== date) setActive({ date, timer: null, drafts: {} });
-  if (!l.warmup) startTimer('warmup', 0);
+  if (!l.warmup && settings.value.autoStart) startTimer('warmup', 0);
 }
 
 function mutateLog(date: DateKey, fn: (l: DayLog) => DayLog) {
@@ -329,11 +330,16 @@ function mutateLog(date: DateKey, fn: (l: DayLog) => DayLog) {
   setLog(fn(structuredClone(l)));
 }
 
-export function setStepDone(date: DateKey, step: 'warmup' | 'cardio', done: boolean) {
+export function setStepDone(date: DateKey, step: TimedStepKind, done: boolean) {
   mutateLog(date, (l) => ({ ...l, [step]: done }));
   const a = active.value;
   if (a?.timer && a.timer.kind === step) setTimer(null);
-  if (done && step === 'warmup' && !logs.value.get(date)?.cardio && isToday(date)) startTimer('cardio', 1);
+  if (done && step === 'warmup' && !logs.value.get(date)?.cardio && isToday(date) && settings.value.autoStart) startTimer('cardio', 1);
+}
+
+/** Step index of the cool-down, or -1 when the program has none. */
+function cooldownStep(l: DayLog): number {
+  return program.value.session.cooldownMin > 0 ? l.moves.length + 2 : -1;
 }
 
 const isToday = (d: DateKey) => d === today.value;
@@ -354,9 +360,19 @@ export function logSet(date: DateKey, moveIdx: number, kg: number | null, reps: 
   });
   if (!isToday(date)) return; // backfill: no timers
   if (!active.value || active.value.date !== date) setActive({ date, timer: null, drafts: active.value?.drafts ?? {} });
+  if (!settings.value.autoStart) return setTimer(null);
+  const l = logs.value.get(date)!;
+  const cool = cooldownStep(l);
   if (!finishedMove) startTimer('rest-set', moveIdx + 2);
   else if (!lastMove) startTimer('rest-move', moveIdx + 3);
+  else if (cool !== -1 && !l.cooldown) startTimer('cooldown', cool);
   else setTimer(null);
+}
+
+/** Manual rest timer, for when auto-start is off. */
+export function startRest(moveIdx: number, moveFinished: boolean) {
+  if (moveFinished) startTimer('rest-move', moveIdx + 3);
+  else startTimer('rest-set', moveIdx + 2);
 }
 
 export function undoSet(date: DateKey, moveIdx: number) {
@@ -452,6 +468,8 @@ export function timerDuration(kind: TimerKind): number {
       return s.warmupMin * 60_000;
     case 'cardio':
       return s.cardioMin * 60_000;
+    case 'cooldown':
+      return s.cooldownMin * 60_000;
     case 'rest-set':
       return s.restSetSec * 1000;
     case 'rest-move':
@@ -495,15 +513,17 @@ export function skipTimer() {
   const t = a?.timer;
   if (!a || !t) return;
   setTimer(null);
-  if (t.kind === 'warmup' || t.kind === 'cardio') setStepDone(a.date, t.kind, true);
+  if (isTimedStep(t.kind)) setStepDone(a.date, t.kind, true);
 }
+
+const isTimedStep = (k: TimerKind): k is TimedStepKind => k === 'warmup' || k === 'cardio' || k === 'cooldown';
 
 /** Called by the ticker when a timer reaches zero; returns true the first time. */
 export function markTimerEnded(): boolean {
   const a = active.value;
   const t = a?.timer;
   if (!a || !t || t.notified) return false;
-  if (t.kind === 'warmup' || t.kind === 'cardio') {
+  if (isTimedStep(t.kind)) {
     setTimer({ ...t, notified: true });
     setStepDone(a.date, t.kind, true);
   } else {

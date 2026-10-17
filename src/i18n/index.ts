@@ -24,4 +24,4 @@ const pluralRules = new Intl.PluralRules(LOCALE);
 const intFmt = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
 export const fmtInt = (n: number) => intFmt.format(n);
 
-export { fmtDate, fmtDayShort, fmtWeekday, fmtNum, fmtKg, fmtSigned, fmtDuration, fmtPct, fmtMonth, fmtTime } from './format';
+export { fmtSet, fmtDate, fmtDayShort, fmtWeekday, fmtNum, fmtKg, fmtSigned, fmtDuration, fmtPct, fmtMonth, fmtTime } from './format';

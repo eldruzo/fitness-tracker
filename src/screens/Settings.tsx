@@ -3,11 +3,15 @@ import { requestNotifications } from '../effects';
 import { fmtDate, t, tn, type MessageKey } from '../i18n';
 import { backupFilename, BackupError, type ParsedBackup } from '../lib/backup';
 import { diffDays, isDateKey, type DateKey } from '../lib/dates';
+import { allProgramImageUrls, AVG_IMAGE_KB, ensureExerciseIndex, saveImagesOffline } from '../lib/exercises';
 import { isBodyweightName, validatePhases } from '../lib/program';
+import { allMoveNames } from '../lib/progress';
 import type { Program, Theme } from '../lib/types';
+import { ACCENTS } from '../lib/validate';
 import { installEvent, isIos, isStandalone, offlineReady, promptInstall } from '../pwa';
 import {
   exportBackupJson,
+  histories,
   lastShiftId,
   meta,
   parseBackup,
@@ -152,6 +156,12 @@ function TrainingOptions() {
       )}
       <Toggle label={t('settings.sound')} checked={s.sound} onChange={(v) => updateSettings({ sound: v })} />
       <Toggle label={t('settings.vibrate')} checked={s.vibrate} onChange={(v) => updateSettings({ vibrate: v })} />
+      <Toggle
+        label={t('settings.autoStart')}
+        hint={t('settings.autoStartHint')}
+        checked={s.autoStart}
+        onChange={(v) => updateSettings({ autoStart: v })}
+      />
       <div class="field-inline">
         <span>{t('settings.notifications')}</span>
         {notif === 'default' ? (
@@ -241,6 +251,7 @@ function ProgramDates() {
           [
             ['warmupMin', 'settings.warmupMin', 0, 60],
             ['cardioMin', 'settings.cardioMin', 0, 120],
+            ['cooldownMin', 'settings.cooldownMin', 0, 60],
             ['sets', 'settings.sets', 1, 10],
             ['reps', 'settings.reps', 1, 100],
             ['restSetSec', 'settings.restSet', 0, 900],
@@ -537,11 +548,68 @@ function Appearance() {
           ]}
         />
       </div>
+      <div class="field">
+        <span class="label" id="accent-label">
+          {t('settings.accent')}
+        </span>
+        <div class="swatches" role="radiogroup" aria-labelledby="accent-label">
+          {ACCENTS.map((a) => (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={s.accent === a}
+              class={`swatch${s.accent === a ? ' on' : ''}`}
+              data-accent={a}
+              onClick={() => updateSettings({ accent: a })}
+              key={a}
+            >
+              <span class="swatch-dot" aria-hidden="true" />
+              {t(`settings.accent.${a}`)}
+            </button>
+          ))}
+        </div>
+      </div>
       <div class="field-inline">
         <span>{t('settings.units')}</span>
         <span class="mono">kg</span>
       </div>
+      <OfflineImages />
     </Section>
+  );
+}
+
+function OfflineImages() {
+  const [state, setState] = useState<{ done: number; total: number; ok: number | null } | null>(null);
+  const names = allMoveNames(program.value, histories.value).map((n) => n.name);
+  const estimateMb = Math.max(1, Math.round((allProgramImageUrls(names).length * AVG_IMAGE_KB) / 1024));
+  const run = async () => {
+    await ensureExerciseIndex().catch(() => undefined);
+    const urls = allProgramImageUrls(names);
+    setState({ done: 0, total: urls.length, ok: null });
+    const ok = await saveImagesOffline(urls, (done) => setState({ done, total: urls.length, ok: null }));
+    setState({ done: urls.length, total: urls.length, ok });
+  };
+  const busy = state !== null && state.ok === null;
+  return (
+    <div class="field">
+      <span class="label">{t('settings.images')}</span>
+      <p class="hint">{t('settings.imagesHint', { mb: estimateMb })}</p>
+      <div class="row-actions">
+        <Button variant="secondary" icon="download" disabled={busy} onClick={() => void run()}>
+          {t('settings.imagesSave')}
+        </Button>
+        {state && (
+          <span class="hint" role="status">
+            {busy
+              ? t('settings.imagesSaving', { done: state.done, total: state.total })
+              : state.ok === state.total
+                ? t('settings.imagesDone', { done: state.ok })
+                : t('settings.imagesFailed', { done: state.ok ?? 0, total: state.total })}
+          </span>
+        )}
+      </div>
+      <p class="hint">{t('settings.imagesCredit')}</p>
+    </div>
   );
 }
 

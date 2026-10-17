@@ -9,7 +9,7 @@ export interface ScheduleContext extends PlanContext {
 /** Has the user done anything in this session? */
 export function hasProgress(log: DayLog | undefined): boolean {
   if (!log) return false;
-  return log.warmup || log.cardio || log.moves.some((m) => m.sets.length > 0);
+  return log.warmup || log.cardio || !!log.cooldown || log.moves.some((m) => m.sets.length > 0);
 }
 
 export function statusFor(p: PlannedDay, log: DayLog | undefined, today: DateKey): DayStatus {

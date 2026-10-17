@@ -29,6 +29,8 @@ export interface MoveTemplate {
 export interface SessionSpec {
   warmupMin: number;
   cardioMin: number;
+  /** 0 hides the cool-down step. */
+  cooldownMin: number;
   sets: number;
   reps: number;
   restSetSec: number;
@@ -54,11 +56,13 @@ export interface Pause {
 }
 
 export type Theme = 'system' | 'light' | 'dark';
+export type Accent = 'orange' | 'blue' | 'teal' | 'purple' | 'pink';
 
 export interface Settings {
   deload: boolean;
   deloadPct: number;
   theme: Theme;
+  accent: Accent;
   unit: 'kg';
   hints: boolean;
   progression: boolean;
@@ -68,6 +72,8 @@ export interface Settings {
   counterTarget: number;
   sound: boolean;
   vibrate: boolean;
+  /** Start the next timer (cardio, rest, cool-down) without a tap. */
+  autoStart: boolean;
   pauses: Pause[];
 }
 
@@ -111,6 +117,7 @@ export interface DayLog {
   status: LogStatus;
   warmup: boolean;
   cardio: boolean;
+  cooldown?: boolean;
   moves: MoveLog[];
   startedAt?: number;
   finishedAt?: number;
@@ -145,7 +152,7 @@ export interface Counters {
   tiptoe: number[];
 }
 
-export type TimerKind = 'warmup' | 'cardio' | 'rest-set' | 'rest-move';
+export type TimerKind = 'warmup' | 'cardio' | 'cooldown' | 'rest-set' | 'rest-move';
 
 export interface TimerState {
   kind: TimerKind;
